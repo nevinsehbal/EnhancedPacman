@@ -18,13 +18,6 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.top = y
         self.rect.left = x
-        self.prev_x = x
-        self.prev_y = y
-
-    # Clear the speed of the player
-    def prevdirection(self):
-        self.prev_x = self.change_x
-        self.prev_y = self.change_y
 
     # Change the speed of the player
     def changespeed(self,x,y):
@@ -37,12 +30,10 @@ class Player(pygame.sprite.Sprite):
         
         old_x=self.rect.left
         new_x=old_x+self.change_x
-        prev_x=old_x+self.prev_x
         self.rect.left = new_x
-        
         old_y=self.rect.top
         new_y=old_y+self.change_y
-        prev_y=old_y+self.prev_y
+        
 
         # Did this update cause us to hit a wall?
         x_collide = pygame.sprite.spritecollide(self, walls, False)

@@ -9,41 +9,14 @@ from Player import *
 from Ghost import *
 from defines import *
 
-# This creates all the walls in room 1
-def setupMaze(all_sprites_list):
-    # Make the walls. (x_pos, y_pos, width, height)
-    wall_list=pygame.sprite.RenderPlain()
-    #TODO: Add wall list as a random maze generation process, not constant walls. The grid is 606*606
-    # This is a list of walls. Each is in the form [x, y, width, height]
-    walls = predefined_walls
-    # Loop through the list. Create the wall, add it to the list
-    for x,y,w,h in walls:
-        new_wall=Wall(x,y,w,h,blue)
-        wall_list.add(new_wall)
-        all_sprites_list.add(new_wall)         
-    # return our new list
-    return wall_list
-
-def setupGate(all_sprites_list):
-      gate = pygame.sprite.RenderPlain()
-      gate.add(Wall(282,242,42,2,white))
-      all_sprites_list.add(gate)
-      return gate
-
 def startGame(screen, clock, font):
-
   # This is a list of 'sprites.' Each block in the program is
   # added to this list. The list is managed by a class called 'RenderPlain.'
   all_sprites_list = pygame.sprite.RenderPlain()
-
   block_list = pygame.sprite.RenderPlain()
-
   monsta_list = pygame.sprite.RenderPlain()
-
-  pacman_collide = pygame.sprite.RenderPlain()
   wall_list = setupMaze(all_sprites_list)
   gate = setupGate(all_sprites_list)
-
 
   p_turn = 0
   p_steps = 0
@@ -61,52 +34,19 @@ def startGame(screen, clock, font):
   # Create the player paddle object
   Pacman = Player( w, p_h, "images/pacman.png" )
   all_sprites_list.add(Pacman)
-  pacman_collide.add(Pacman)
    
-  Blinky=Ghost( w, b_h, "images/Blinky.png" )
-  monsta_list.add(Blinky)
-  all_sprites_list.add(Blinky)
+  Blinky = createGhost(w, b_h, "images/Blinky.png")
+  Pinky = createGhost(w, m_h, "images/Pinky.png")
+  Inky = createGhost(i_w, m_h, "images/Inky.png")
+  Clyde = createGhost(c_w, m_h, "images/Clyde.png")
+  monsta_list.add(Blinky,Pinky,Inky,Clyde)
 
-  Pinky=Ghost( w, m_h, "images/Pinky.png" )
-  monsta_list.add(Pinky)
-  all_sprites_list.add(Pinky)
-   
-  Inky=Ghost( i_w, m_h, "images/Inky.png" )
-  monsta_list.add(Inky)
-  all_sprites_list.add(Inky)
-   
-  Clyde=Ghost( c_w, m_h, "images/Clyde.png" )
-  monsta_list.add(Clyde)
-  all_sprites_list.add(Clyde)
-
-  # Draw the grid
-  for row in range(19):
-      for column in range(19):
-          if (row == 7 or row == 8) and (column == 8 or column == 9 or column == 10):
-              continue
-          else:
-            block = Block(yellow, 4, 4)
-
-            # Set a random location for the block
-            block.rect.x = (30*column+6)+26
-            block.rect.y = (30*row+6)+26
-
-            b_collide = pygame.sprite.spritecollide(block, wall_list, False)
-            p_collide = pygame.sprite.spritecollide(block, pacman_collide, False)
-            if b_collide:
-              continue
-            elif p_collide:
-              continue
-            else:
-              # Add the block to the list of objects
-              block_list.add(block)
-              all_sprites_list.add(block)
+  drawFoods(block_list,all_sprites_list)
 
   bll = len(block_list)
 
   score = 0
   game_quitted = False
-  i = 0
 
   while not game_quitted:
       # ALL EVENT PROCESSING SHOULD GO BELOW THIS COMMENT
@@ -164,8 +104,8 @@ def startGame(screen, clock, font):
       Clyde.update(wall_list)
 
       # See if the Pacman block has collided with anything.
+      # dokill = True parameter (3rd) removes the collided blocks from the screen.
       blocks_hit_list = pygame.sprite.spritecollide(Pacman, block_list, True)
-       
       # Check the list of collisions.
       if len(blocks_hit_list) > 0:
           score +=len(blocks_hit_list)
@@ -174,11 +114,8 @@ def startGame(screen, clock, font):
    
       # ALL CODE TO DRAW SHOULD GO BELOW THIS COMMENT
       screen.fill(black)
-        
       wall_list.draw(screen)
-
       gate.draw(screen)
-      
       all_sprites_list.draw(screen)
       monsta_list.draw(screen)
 
@@ -186,20 +123,19 @@ def startGame(screen, clock, font):
       screen.blit(text, [10, 10])
 
       if score == bll:
-        doNext("Congratulations, you won!",145,all_sprites_list,block_list,monsta_list,pacman_collide,wall_list,gate, screen, clock, font)
+        doNext("Congratulations, you won!",145,all_sprites_list,block_list,monsta_list,wall_list,gate, screen, clock, font)
 
       monsta_hit_list = pygame.sprite.spritecollide(Pacman, monsta_list, False)
 
       if monsta_hit_list:
-        doNext("Game Over",235,all_sprites_list,block_list,monsta_list,pacman_collide,wall_list,gate, screen, clock, font)
+        doNext("Game Over",235,all_sprites_list,block_list,monsta_list,wall_list,gate, screen, clock, font)
 
       # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
-      
       pygame.display.flip()
-    
       clock.tick(10)
 
-def doNext(message,left,all_sprites_list,block_list,monsta_list,pacman_collide,wall_list,gate, screen, clock, font):
+
+def doNext(message,left,all_sprites_list,block_list,monsta_list,wall_list,gate, screen, clock, font):
   while True:
       # ALL EVENT PROCESSING SHOULD GO BELOW THIS COMMENT
       for event in pygame.event.get():
@@ -212,7 +148,6 @@ def doNext(message,left,all_sprites_list,block_list,monsta_list,pacman_collide,w
             del all_sprites_list
             del block_list
             del monsta_list
-            del pacman_collide
             del wall_list
             del gate
             startGame(screen, clock, font)
@@ -234,3 +169,48 @@ def doNext(message,left,all_sprites_list,block_list,monsta_list,pacman_collide,w
 
       pygame.display.flip()
       clock.tick(10)
+
+
+# This creates all the walls in room 1
+def setupMaze(all_sprites_list):
+    # Make the walls. (x_pos, y_pos, width, height)
+    wall_list=pygame.sprite.RenderPlain()
+    #TODO: Add wall list as a random maze generation process, not constant walls. The grid is 606*606
+    # This is a list of walls. Each is in the form [x, y, width, height]
+    walls = predefined_walls
+    # Loop through the list. Create the wall, add it to the list
+    for x,y,w,h in walls:
+        new_wall=Wall(x,y,w,h,blue)
+        wall_list.add(new_wall)
+        all_sprites_list.add(new_wall)         
+    # return our new list
+    return wall_list
+
+def setupGate(all_sprites_list):
+      gate = pygame.sprite.RenderPlain()
+      gate.add(Wall(282,242,42,2,white))
+      all_sprites_list.add(gate)
+      return gate
+
+def createGhost(width, height, image_path):
+   ghost = Ghost(width, height, image_path)
+   return ghost
+
+def drawFoods(block_list,all_sprites_list):
+   # Draw the grid
+  for row in range(19):
+      for column in range(19):
+          if (row == 7 or row == 8) and (column == 8 or column == 9 or column == 10):
+              continue
+          else:
+            block = Block(yellow, 4, 4)
+            # Set a random location for the block
+            block.rect.x = (30*column+6)+26
+            block.rect.y = (30*row+6)+26
+            collision = pygame.sprite.spritecollide(block, all_sprites_list, False)
+            if collision:
+               continue
+            else:
+                # Add the block to the list of objects
+                block_list.add(block)
+                all_sprites_list.add(block)

@@ -30,12 +30,10 @@ class Ghost(Player):
         # Get the old position, in case we need to go back to it
         old_x=self.rect.left
         new_x=old_x+self.change_x
-        prev_x=old_x+self.prev_x
         self.rect.left = new_x
-        
         old_y=self.rect.top
         new_y=old_y+self.change_y
-        prev_y=old_y+self.prev_y
+      
 
         # Did this update cause us to hit a wall?
         x_collide = pygame.sprite.spritecollide(self, walls, False)
