@@ -10,57 +10,17 @@ from Ghost import *
 from defines import *
 
 # This creates all the walls in room 1
-def setupRoomOne(all_sprites_list):
+def setupMaze(all_sprites_list):
     # Make the walls. (x_pos, y_pos, width, height)
     wall_list=pygame.sprite.RenderPlain()
-     
+    #TODO: Add wall list as a random maze generation process, not constant walls. The grid is 606*606
     # This is a list of walls. Each is in the form [x, y, width, height]
-    walls = [ [0,0,6,600],
-              [0,0,600,6],
-              [0,600,606,6],
-              [600,0,6,606],
-              [300,0,6,66],
-              [60,60,186,6],
-              [360,60,186,6],
-              [60,120,66,6],
-              [60,120,6,126],
-              [180,120,246,6],
-              [300,120,6,66],
-              [480,120,66,6],
-              [540,120,6,126],
-              [120,180,126,6],
-              [120,180,6,126],
-              [360,180,126,6],
-              [480,180,6,126],
-              [180,240,6,126],
-              [180,360,246,6],
-              [420,240,6,126],
-              [240,240,42,6],
-              [324,240,42,6],
-              [240,240,6,66],
-              [240,300,126,6],
-              [360,240,6,66],
-              [0,300,66,6],
-              [540,300,66,6],
-              [60,360,66,6],
-              [60,360,6,186],
-              [480,360,66,6],
-              [540,360,6,186],
-              [120,420,366,6],
-              [120,420,6,66],
-              [480,420,6,66],
-              [180,480,246,6],
-              [300,480,6,66],
-              [120,540,126,6],
-              [360,540,126,6]
-            ]
-     
+    walls = predefined_walls
     # Loop through the list. Create the wall, add it to the list
-    for item in walls:
-        wall=Wall(item[0],item[1],item[2],item[3],blue)
-        wall_list.add(wall)
-        all_sprites_list.add(wall)
-         
+    for x,y,w,h in walls:
+        new_wall=Wall(x,y,w,h,blue)
+        wall_list.add(new_wall)
+        all_sprites_list.add(new_wall)         
     # return our new list
     return wall_list
 
@@ -81,9 +41,7 @@ def startGame(screen, clock, font):
   monsta_list = pygame.sprite.RenderPlain()
 
   pacman_collide = pygame.sprite.RenderPlain()
-
-  wall_list = setupRoomOne(all_sprites_list)
-
+  wall_list = setupMaze(all_sprites_list)
   gate = setupGate(all_sprites_list)
 
 
@@ -147,16 +105,14 @@ def startGame(screen, clock, font):
   bll = len(block_list)
 
   score = 0
-
-  done = False
-
+  game_quitted = False
   i = 0
 
-  while done == False:
+  while not game_quitted:
       # ALL EVENT PROCESSING SHOULD GO BELOW THIS COMMENT
       for event in pygame.event.get():
           if event.type == pygame.QUIT:
-              done=True
+              game_quitted=True
 
           if event.type == pygame.KEYDOWN:
               if event.key == pygame.K_LEFT:
@@ -182,30 +138,30 @@ def startGame(screen, clock, font):
    
       # ALL GAME LOGIC SHOULD GO BELOW THIS COMMENT
       Pacman.update(wall_list,gate)
-
+      
       returned = Pinky.changespeed(Pinky_directions,False,p_turn,p_steps,pl)
       p_turn = returned[0]
       p_steps = returned[1]
       Pinky.changespeed(Pinky_directions,False,p_turn,p_steps,pl)
-      Pinky.update(wall_list,False)
+      Pinky.update(wall_list)
 
       returned = Blinky.changespeed(Blinky_directions,False,b_turn,b_steps,bl)
       b_turn = returned[0]
       b_steps = returned[1]
       Blinky.changespeed(Blinky_directions,False,b_turn,b_steps,bl)
-      Blinky.update(wall_list,False)
+      Blinky.update(wall_list)
 
       returned = Inky.changespeed(Inky_directions,False,i_turn,i_steps,il)
       i_turn = returned[0]
       i_steps = returned[1]
       Inky.changespeed(Inky_directions,False,i_turn,i_steps,il)
-      Inky.update(wall_list,False)
+      Inky.update(wall_list)
 
       returned = Clyde.changespeed(Clyde_directions,"clyde",c_turn,c_steps,cl)
       c_turn = returned[0]
       c_steps = returned[1]
       Clyde.changespeed(Clyde_directions,"clyde",c_turn,c_steps,cl)
-      Clyde.update(wall_list,False)
+      Clyde.update(wall_list)
 
       # See if the Pacman block has collided with anything.
       blocks_hit_list = pygame.sprite.spritecollide(Pacman, block_list, True)
@@ -220,7 +176,9 @@ def startGame(screen, clock, font):
       screen.fill(black)
         
       wall_list.draw(screen)
+
       gate.draw(screen)
+      
       all_sprites_list.draw(screen)
       monsta_list.draw(screen)
 

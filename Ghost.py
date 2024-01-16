@@ -1,4 +1,5 @@
 from Player import Player
+import pygame
 
 #Inheritime Player klassist
 class Ghost(Player):
@@ -23,3 +24,30 @@ class Ghost(Player):
         return [turn,steps]
       except IndexError:
          return [0,0]
+      
+    # Find a new position for the player
+    def update(self,walls):
+        # Get the old position, in case we need to go back to it
+        old_x=self.rect.left
+        new_x=old_x+self.change_x
+        prev_x=old_x+self.prev_x
+        self.rect.left = new_x
+        
+        old_y=self.rect.top
+        new_y=old_y+self.change_y
+        prev_y=old_y+self.prev_y
+
+        # Did this update cause us to hit a wall?
+        x_collide = pygame.sprite.spritecollide(self, walls, False)
+        if x_collide:
+            # Whoops, hit a wall. Go back to the old position
+            self.rect.left=old_x
+        else:
+
+            self.rect.top = new_y
+
+            # Did this update cause us to hit a wall?
+            y_collide = pygame.sprite.spritecollide(self, walls, False)
+            if y_collide:
+                # Whoops, hit a wall. Go back to the old position
+                self.rect.top=old_y

@@ -1,13 +1,16 @@
 from pacman import *
 
+MUSIC_ON = False
+
 def init_environment():
     # Call this function so the Pygame library can initialize itself
     pygame.init()
 
-    #Add music
-    pygame.mixer.init()
-    pygame.mixer.music.load('pacman.mp3')
-    pygame.mixer.music.play(-1, 0.0)
+    if MUSIC_ON:
+        #Add music
+        pygame.mixer.init()
+        pygame.mixer.music.load('pacman.mp3')
+        pygame.mixer.music.play(-1, 0.0)
 
     # Create an 606x606 sized screen
     screen = pygame.display.set_mode([606, 606])
