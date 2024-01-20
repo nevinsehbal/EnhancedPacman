@@ -26,129 +26,7 @@ blue = (0,0,255)
 green = (0,255,0)
 red = (255,0,0)
 purple = (255,0,255)
-yellow   = ( 255, 255,   0)
-
-
-Pinky_directions = [
-[0,-30,4],
-[15,0,9],
-[0,15,11],
-[-15,0,23],
-[0,15,7],
-[15,0,3],
-[0,-15,3],
-[15,0,19],
-[0,15,3],
-[15,0,3],
-[0,15,3],
-[15,0,3],
-[0,-15,15],
-[-15,0,7],
-[0,15,3],
-[-15,0,19],
-[0,-15,11],
-[15,0,9]
-]
-
-Blinky_directions = [
-[0,-15,4],
-[15,0,9],
-[0,15,11],
-[15,0,3],
-[0,15,7],
-[-15,0,11],
-[0,15,3],
-[15,0,15],
-[0,-15,15],
-[15,0,3],
-[0,-15,11],
-[-15,0,3],
-[0,-15,11],
-[-15,0,3],
-[0,-15,3],
-[-15,0,7],
-[0,-15,3],
-[15,0,15],
-[0,15,15],
-[-15,0,3],
-[0,15,3],
-[-15,0,3],
-[0,-15,7],
-[-15,0,3],
-[0,15,7],
-[-15,0,11],
-[0,-15,7],
-[15,0,5]
-]
-
-Inky_directions = [
-[30,0,2],
-[0,-15,4],
-[15,0,10],
-[0,15,7],
-[15,0,3],
-[0,-15,3],
-[15,0,3],
-[0,-15,15],
-[-15,0,15],
-[0,15,3],
-[15,0,15],
-[0,15,11],
-[-15,0,3],
-[0,-15,7],
-[-15,0,11],
-[0,15,3],
-[-15,0,11],
-[0,15,7],
-[-15,0,3],
-[0,-15,3],
-[-15,0,3],
-[0,-15,15],
-[15,0,15],
-[0,15,3],
-[-15,0,15],
-[0,15,11],
-[15,0,3],
-[0,-15,11],
-[15,0,11],
-[0,15,3],
-[15,0,1],
-]
-
-Clyde_directions = [
-[-30,0,2],
-[0,-15,4],
-[15,0,5],
-[0,15,7],
-[-15,0,11],
-[0,-15,7],
-[-15,0,3],
-[0,15,7],
-[-15,0,7],
-[0,15,15],
-[15,0,15],
-[0,-15,3],
-[-15,0,11],
-[0,-15,7],
-[15,0,3],
-[0,-15,11],
-[15,0,9],
-]
-
-pinky_directions_len = len(Pinky_directions)-1
-bl = len(Blinky_directions)-1
-il = len(Inky_directions)-1
-cl = len(Clyde_directions)-1
-
-
-#default locations for Pacman and monstas
-w = 303-16 #Width
-p_h = (7*60)+19 #Pacman height
-m_h = (4*60)+19 #Monster height
-b_h = (3*60)+19 #Binky height
-i_w = 303-16-32 #Inky width
-c_w = 303+(32-16) #Clyde width
-
+yellow   = ( 255, 255, 0)
 
 def create_walls():
    frame_walls = [[0,0,6,600], [0,0,600,6], [0,600,606,6],[600,0,6,606]]
@@ -160,19 +38,15 @@ def recursive_backtracking(x_starts, y_starts):
     # Recursive backtracking algorithm for maze generation
     stack = []
     maze = []
-
     for x in x_starts:
         for y in y_starts:
             stack.append((x, y))
-
     while stack:
         x, y = stack.pop()
         if [x, y, 64, 6] not in maze and [x, y, 6, 64] not in maze and not is_frame_wall(x, y):
             maze.append([x, y, 64, 6]) if random.choice([True, False]) else maze.append([x, y, 6, 64])
-
             directions = [(0, 60), (0, -60), (60, 0), (-60, 0)]
             random.shuffle(directions)
-
             for dx, dy in directions:
                 nx, ny = x + dx, y + dy
                 if 0 <= nx <= 480 and 0 <= ny <= 480 and [nx, ny, 64, 6] not in maze \

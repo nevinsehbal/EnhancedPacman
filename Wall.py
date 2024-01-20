@@ -1,5 +1,5 @@
 import pygame
-from defines import *
+from helpers import *
 
 # This class represents the bar at the bottom that the player controls
 class Wall(pygame.sprite.Sprite):

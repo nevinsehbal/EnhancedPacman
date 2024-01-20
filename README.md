@@ -4,7 +4,7 @@ This is an enhanced implementation of the Pac-Man game, which uses [Pacman in Py
 
 The enhancements are:
 
-* [ ] Maze generation: In each run of the game, a new maze is generated.
-* [ ] Strategy-AI: Ghosts are spawned at the positions in order to maximize the possibility of winning the game.
-* [ ] Tactical-AI: Ghost movements are decided with a distance sensing mechanism.
-* [ ] Analystics: The movements of the entities are logged in an analytics module in each game.
+* [X] Maze generation: In each run of the game, a new maze is generated.
+* [X] Strategy-AI: Ghosts are spawned at the positions in order to maximize the possibility of winning the game.
+* [X] Tactical-AI: Ghost movements are decided with a distance sensing mechanism.
+* [X] Analystics: The movements of the entities are logged in an analytics module in each game.

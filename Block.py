@@ -1,5 +1,5 @@
 import pygame
-from defines import *
+from helpers import *
 
 # This class represents the ball        
 # It derives from the "Sprite" class in Pygame

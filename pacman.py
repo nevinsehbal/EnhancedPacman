@@ -7,8 +7,10 @@ from Wall import *
 from Block import *
 from Player import *
 from Ghost import *
-from defines import *
+from helpers import *
 from Astar import *
+import time
+from Analytics import *
 
 # Function to update the ghost position
 def update_ghost_position(ghost, graph, pacman_position):
@@ -32,23 +34,23 @@ def startGame(screen, clock, font):
   all_sprites_list.add(Pacman)
 
   Graph = initialize_A_star(vertices_list,wall_list)
-  ghost_list = list()
-  ghost = createGhost2(Pacman.getVertexPosition(),Graph)
-  ghost_list.append(ghost)
+  ghost = createGhost(Pacman.getVertexPosition(),Graph)
+  monsta_list.add(ghost)
    
-  Blinky = createGhost(32, 362, "images/Blinky.png")
-  Pinky = createGhost(32, 362,"images/Pinky.png")
-  Inky = createGhost(32, 92, "images/Inky.png") 
-  Clyde = createGhost(32, 272, "images/Clyde.png") 
-  monsta_list.add(Blinky,Pinky,Inky,Clyde)
-
   drawFoods(block_list,all_sprites_list)
 
   bll = len(block_list)
   score = 0
   game_quitted = False
   ghost_update = False
+
+  analytics_logger = initialize_analytics()
+  init_time = time.time()
   while not game_quitted:
+      # apply logging for analytics
+      log_entity_movement("Pacman", Pacman.getVertexPosition(),analytics_logger)
+      for i, ghost in enumerate(monsta_list):
+        log_entity_movement("Ghost_"+str(i), ghost.getVertexPosition(),analytics_logger)
       # ALL EVENT PROCESSING SHOULD GO BELOW THIS COMMENT
       for event in pygame.event.get():
           if event.type == pygame.QUIT:
@@ -77,25 +79,22 @@ def startGame(screen, clock, font):
       # ALL EVENT PROCESSING SHOULD GO ABOVE THIS COMMENT
    
       # ALL GAME LOGIC SHOULD GO BELOW THIS COMMENT
+                  
+      if(time.time()-init_time > 10): # if more than 10 seconds is passed
+         init_time = time.time()
+         ghost = createGhost(Pacman.getVertexPosition(),Graph)
+         monsta_list.add(ghost)
+         
       Pacman.update(wall_list)
 
       if(ghost_update):
         ghost_update = False
-        if(is_closer_than_threshold(Pinky.getVertexPosition(),Pacman.getVertexPosition())):
-          pinky_next_destination = A_star(Graph, Pinky.getVertexPosition(),Pacman.getVertexPosition())[-2]
-          Pinky.setVertexPosition(pinky_next_destination.x,pinky_next_destination.y)
-        else:
-           Pinky.randomMovement(wall_list)
-
-
-        # blinky_next_destination = A_star(Graph, Blinky.getVertexPosition(),Pacman.getVertexPosition())[-2]
-        # Blinky.setVertexPosition(blinky_next_destination.x,blinky_next_destination.y)
-
-        # inky_next_destination = A_star(Graph, Inky.getVertexPosition(),Pacman.getVertexPosition())[-2]
-        # Inky.setVertexPosition(inky_next_destination.x,inky_next_destination.y)
-
-        # clyde_next_destination = A_star(Graph, Clyde.getVertexPosition(),Pacman.getVertexPosition())[-2]
-        # Clyde.setVertexPosition(clyde_next_destination.x,clyde_next_destination.y)
+        for ghost in monsta_list:
+           if(is_closer_than_threshold(ghost.getVertexPosition(),Pacman.getVertexPosition())):
+              ghost_next_destination = A_star(Graph, ghost.getVertexPosition(),Pacman.getVertexPosition())[-2]
+              ghost.setVertexPosition(ghost_next_destination.x,ghost_next_destination.y)
+           else:
+              ghost.randomMovement(wall_list)
       else:
          ghost_update = True
 
@@ -183,17 +182,10 @@ def setupMaze(all_sprites_list):
     # return our new list
     return wall_list
 
-
-def createGhost(width, height, image_path):
-   ghost = Ghost(width, height, image_path)
-   return ghost
-
-def createGhost2(pacman_pos, graph):
-  min_distance = 300
-  max_distance = 360
+def createGhost(pacman_pos, graph):
+  min_distance = 360
+  max_distance = 390
   color_path = random.choice(["images/Blinky.png", "images/Pinky.png", "images/Inky.png", "images/Clyde.png"])
-  pacman_pos[0] 
-  pacman_pos[1]
   v,e = graph
   for vertex in v:
      if(min_distance < math.sqrt((pacman_pos[0] - vertex.x)**2 + (pacman_pos[1] - vertex.y)**2) < max_distance):
