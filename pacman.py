@@ -10,6 +10,11 @@ from Ghost import *
 from defines import *
 from Astar import *
 
+# Function to update the ghost position
+def update_ghost_position(ghost, graph, pacman_position):
+    next_destination = A_star(graph, ghost.getVertexPosition(), pacman_position)[-2]
+    ghost.setVertexPosition(next_destination.x, next_destination.y)
+
 
 def startGame(screen, clock, font):
   # This is a list of 'sprites.' Each block in the program is
@@ -20,17 +25,21 @@ def startGame(screen, clock, font):
   monsta_list = pygame.sprite.RenderPlain()
   wall_list = setupMaze(all_sprites_list)
 
-
+  pacman_initial_x = random.choice([32,572])
+  pacman_initial_y = random.choice([32,572])
   # Create the player paddle object
-  Pacman = Player( w, p_h, "images/pacman.png" )
+  Pacman = Player(pacman_initial_x, pacman_initial_y, "images/pacman.png" )
   all_sprites_list.add(Pacman)
 
-  #Graph = initialize_A_star(vertices_list,wall_list)
+  Graph = initialize_A_star(vertices_list,wall_list)
+  ghost_list = list()
+  ghost = createGhost2(Pacman.getVertexPosition(),Graph)
+  ghost_list.append(ghost)
    
-  Blinky = createGhost(w, b_h, "images/Blinky.png")
-  Pinky = createGhost(w, m_h, "images/Pinky.png")
-  Inky = createGhost(i_w+2, m_h, "images/Inky.png") 
-  Clyde = createGhost(c_w-2, m_h, "images/Clyde.png") 
+  Blinky = createGhost(32, 362, "images/Blinky.png")
+  Pinky = createGhost(32, 362,"images/Pinky.png")
+  Inky = createGhost(32, 92, "images/Inky.png") 
+  Clyde = createGhost(32, 272, "images/Clyde.png") 
   monsta_list.add(Blinky,Pinky,Inky,Clyde)
 
   drawFoods(block_list,all_sprites_list)
@@ -70,21 +79,25 @@ def startGame(screen, clock, font):
       # ALL GAME LOGIC SHOULD GO BELOW THIS COMMENT
       Pacman.update(wall_list)
 
-      # if(ghost_update):
-      #   ghost_update = False
-      #   pinky_next_destination = A_star(Graph, Pinky.getVertexPosition(),Pacman.getVertexPosition())[-2]
-      #   Pinky.setVertexPosition(pinky_next_destination.x,pinky_next_destination.y)
+      if(ghost_update):
+        ghost_update = False
+        if(is_closer_than_threshold(Pinky.getVertexPosition(),Pacman.getVertexPosition())):
+          pinky_next_destination = A_star(Graph, Pinky.getVertexPosition(),Pacman.getVertexPosition())[-2]
+          Pinky.setVertexPosition(pinky_next_destination.x,pinky_next_destination.y)
+        else:
+           Pinky.randomMovement(wall_list)
 
-      #   blinky_next_destination = A_star(Graph, Blinky.getVertexPosition(),Pacman.getVertexPosition())[-2]
-      #   Blinky.setVertexPosition(blinky_next_destination.x,blinky_next_destination.y)
 
-      #   inky_next_destination = A_star(Graph, Inky.getVertexPosition(),Pacman.getVertexPosition())[-2]
-      #   Inky.setVertexPosition(inky_next_destination.x,inky_next_destination.y)
+        # blinky_next_destination = A_star(Graph, Blinky.getVertexPosition(),Pacman.getVertexPosition())[-2]
+        # Blinky.setVertexPosition(blinky_next_destination.x,blinky_next_destination.y)
 
-      #   clyde_next_destination = A_star(Graph, Clyde.getVertexPosition(),Pacman.getVertexPosition())[-2]
-      #   Clyde.setVertexPosition(clyde_next_destination.x,clyde_next_destination.y)
-      # else:
-      #    ghost_update = True
+        # inky_next_destination = A_star(Graph, Inky.getVertexPosition(),Pacman.getVertexPosition())[-2]
+        # Inky.setVertexPosition(inky_next_destination.x,inky_next_destination.y)
+
+        # clyde_next_destination = A_star(Graph, Clyde.getVertexPosition(),Pacman.getVertexPosition())[-2]
+        # Clyde.setVertexPosition(clyde_next_destination.x,clyde_next_destination.y)
+      else:
+         ghost_update = True
 
       # See if the Pacman block has collided with anything.
       # dokill = True parameter (3rd) removes the collided blocks from the screen.
@@ -115,6 +128,9 @@ def startGame(screen, clock, font):
       # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
       pygame.display.flip()
       clock.tick(10)
+
+def is_closer_than_threshold(obj1, obj2, thresh = 360):
+   return (math.sqrt((obj1[0] - obj2[0])**2 + (obj1[1] - obj2[1])**2) < thresh)
 
 
 def doNext(message,left,all_sprites_list,block_list,monsta_list,wall_list, screen, clock, font):
@@ -171,6 +187,21 @@ def setupMaze(all_sprites_list):
 def createGhost(width, height, image_path):
    ghost = Ghost(width, height, image_path)
    return ghost
+
+def createGhost2(pacman_pos, graph):
+  min_distance = 300
+  max_distance = 360
+  color_path = random.choice(["images/Blinky.png", "images/Pinky.png", "images/Inky.png", "images/Clyde.png"])
+  pacman_pos[0] 
+  pacman_pos[1]
+  v,e = graph
+  for vertex in v:
+     if(min_distance < math.sqrt((pacman_pos[0] - vertex.x)**2 + (pacman_pos[1] - vertex.y)**2) < max_distance):
+        ghost_pos = (vertex.x,vertex.y)
+  ghost = Ghost(ghost_pos[0], ghost_pos[1], color_path)
+  #print("Ghost is at:", ghost_pos)
+  return ghost
+  
 
 def drawFoods(block_list,all_sprites_list):
    # Draw the grid

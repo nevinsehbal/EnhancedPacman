@@ -16,8 +16,9 @@ class Player(pygame.sprite.Sprite):
   
         # Make our top-left corner the passed-in location.
         self.rect = self.image.get_rect()
-        self.rect.top = y
-        self.rect.left = x # x = 255, we want it to be x+2 (257) for Inky. x-2 for Clyde
+        self.setVertexPosition(x,y)
+        # self.rect.top = y
+        # self.rect.left = x # x = 255, we want it to be x+2 (257) for Inky. x-2 for Clyde
         
 
     # Change the speed of the player

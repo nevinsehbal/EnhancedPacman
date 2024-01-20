@@ -152,7 +152,7 @@ c_w = 303+(32-16) #Clyde width
 
 def create_walls():
    frame_walls = [[0,0,6,600], [0,0,600,6], [0,600,606,6],[600,0,6,606]]
-   starts = [0,60,120,180,240,300,360,420,480,540]
+   starts = [0,60,120,180,240,300,360,420,480]
    maze = recursive_backtracking(starts, starts)
    return maze+frame_walls
 
@@ -167,21 +167,19 @@ def recursive_backtracking(x_starts, y_starts):
 
     while stack:
         x, y = stack.pop()
-        if [x, y, 60, 6] not in maze and [x, y, 6, 60] not in maze and not is_frame_wall(x, y):
-            maze.append([x, y, 60, 6]) if random.choice([True, False]) else maze.append([x, y, 6, 60])
+        if [x, y, 64, 6] not in maze and [x, y, 6, 64] not in maze and not is_frame_wall(x, y):
+            maze.append([x, y, 64, 6]) if random.choice([True, False]) else maze.append([x, y, 6, 64])
 
             directions = [(0, 60), (0, -60), (60, 0), (-60, 0)]
             random.shuffle(directions)
 
             for dx, dy in directions:
                 nx, ny = x + dx, y + dy
-                if 0 <= nx <= 540 and 0 <= ny <= 540 and [nx, ny, 60, 6] not in maze \
-                        and [nx, ny, 6, 60] not in maze and not is_frame_wall(nx, ny):
+                if 0 <= nx <= 480 and 0 <= ny <= 480 and [nx, ny, 64, 6] not in maze \
+                        and [nx, ny, 6, 64] not in maze and not is_frame_wall(nx, ny):
                     stack.append((nx, ny))
-
     return maze
 
 def is_frame_wall(x, y):
     # Check if the position is within the frame walls
     return (0 < x < 600 and y == 0) or (x == 0 and 0 < y < 600) or (0 < x < 600 and y == 600) or (x == 600 and 0 < y < 600)
-
