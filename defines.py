@@ -1,3 +1,25 @@
+import random
+
+# A node class to hold cost functions and position of a point in the graph.
+class Node:
+    def __init__(self,x,y):
+        self.x = x
+        self.y = y
+        self.g = 0  # cost from start node to current node
+        self.h = 0  # heuristic cost from current node to goal node
+        self.f = 0  # total cost (g + h)
+        self.parent = None
+    def __str__(self): #For printing purposes
+      return f'({self.x},{self.y})'
+    def __repr__(self):#For printing purposes
+      return str(self)
+    def __eq__(self,other):
+       return isinstance(other, Node) and self.x == other.x and self.y == other.y
+    def get_coordinates(self):
+      return (self.x,self.y)
+    
+
+
 black = (0,0,0)
 white = (255,255,255)
 blue = (0,0,255)
@@ -113,7 +135,7 @@ Clyde_directions = [
 [15,0,9],
 ]
 
-pl = len(Pinky_directions)-1
+pinky_directions_len = len(Pinky_directions)-1
 bl = len(Blinky_directions)-1
 il = len(Inky_directions)-1
 cl = len(Clyde_directions)-1
@@ -128,42 +150,38 @@ i_w = 303-16-32 #Inky width
 c_w = 303+(32-16) #Clyde width
 
 
-predefined_walls = [ [0,0,6,600],
-              [0,0,600,6],
-              [0,600,606,6],
-              [600,0,6,606],
-              [300,0,6,66],
-              [60,60,186,6],
-              [360,60,186,6],
-              [60,120,66,6],
-              [60,120,6,126],
-              [180,120,246,6],
-              [300,120,6,66],
-              [480,120,66,6],
-              [540,120,6,126],
-              [120,180,126,6],
-              [120,180,6,126],
-              [360,180,126,6],
-              [480,180,6,126],
-              [180,240,6,126],
-              [180,360,246,6],
-              [420,240,6,126],
-              [240,240,42,6],
-              [324,240,42,6],
-              [240,240,6,66],
-              [240,300,126,6],
-              [360,240,6,66],
-              [0,300,66,6],
-              [540,300,66,6],
-              [60,360,66,6],
-              [60,360,6,186],
-              [480,360,66,6],
-              [540,360,6,186],
-              [120,420,366,6],
-              [120,420,6,66],
-              [480,420,6,66],
-              [180,480,246,6],
-              [300,480,6,66],
-              [120,540,126,6],
-              [360,540,126,6]
-            ]
+def create_walls():
+   frame_walls = [[0,0,6,600], [0,0,600,6], [0,600,606,6],[600,0,6,606]]
+   starts = [0,60,120,180,240,300,360,420,480,540]
+   maze = recursive_backtracking(starts, starts)
+   return maze+frame_walls
+
+def recursive_backtracking(x_starts, y_starts):
+    # Recursive backtracking algorithm for maze generation
+    stack = []
+    maze = []
+
+    for x in x_starts:
+        for y in y_starts:
+            stack.append((x, y))
+
+    while stack:
+        x, y = stack.pop()
+        if [x, y, 60, 6] not in maze and [x, y, 6, 60] not in maze and not is_frame_wall(x, y):
+            maze.append([x, y, 60, 6]) if random.choice([True, False]) else maze.append([x, y, 6, 60])
+
+            directions = [(0, 60), (0, -60), (60, 0), (-60, 0)]
+            random.shuffle(directions)
+
+            for dx, dy in directions:
+                nx, ny = x + dx, y + dy
+                if 0 <= nx <= 540 and 0 <= ny <= 540 and [nx, ny, 60, 6] not in maze \
+                        and [nx, ny, 6, 60] not in maze and not is_frame_wall(nx, ny):
+                    stack.append((nx, ny))
+
+    return maze
+
+def is_frame_wall(x, y):
+    # Check if the position is within the frame walls
+    return (0 < x < 600 and y == 0) or (x == 0 and 0 < y < 600) or (0 < x < 600 and y == 600) or (x == 600 and 0 < y < 600)
+
