@@ -12,12 +12,6 @@ from Astar import *
 import time
 from Analytics import *
 
-# Function to update the ghost position
-def update_ghost_position(ghost, graph, pacman_position):
-    next_destination = A_star(graph, ghost.getVertexPosition(), pacman_position)[-2]
-    ghost.setVertexPosition(next_destination.x, next_destination.y)
-
-
 def startGame(screen, clock, font):
   # This is a list of 'sprites.' Each block in the program is
   # added to this list. The list is managed by a class called 'RenderPlain.'
@@ -25,6 +19,8 @@ def startGame(screen, clock, font):
   block_list = pygame.sprite.RenderPlain()
   vertices_list = pygame.sprite.RenderPlain()
   monsta_list = pygame.sprite.RenderPlain()
+
+  # Maze is created using recursive_backtracking algorithm
   wall_list = setupMaze(all_sprites_list)
 
   pacman_initial_x = random.choice([32,572])
@@ -128,10 +124,6 @@ def startGame(screen, clock, font):
       pygame.display.flip()
       clock.tick(10)
 
-def is_closer_than_threshold(obj1, obj2, thresh = 360):
-   return (math.sqrt((obj1[0] - obj2[0])**2 + (obj1[1] - obj2[1])**2) < thresh)
-
-
 def doNext(message,left,all_sprites_list,block_list,monsta_list,wall_list, screen, clock, font):
   while True:
       # ALL EVENT PROCESSING SHOULD GO BELOW THIS COMMENT
@@ -166,6 +158,7 @@ def doNext(message,left,all_sprites_list,block_list,monsta_list,wall_list, scree
       pygame.display.flip()
       clock.tick(10)
 
+#----------------------- HELPER FUNCTIONS ---------------------
 
 # This creates all the walls in room 1
 def setupMaze(all_sprites_list):
@@ -214,3 +207,12 @@ def drawFoods(block_list,all_sprites_list):
               # Add the block to the list of objects
               block_list.add(block)
               all_sprites_list.add(block)
+
+
+# Function to update the ghost position
+def update_ghost_position(ghost, graph, pacman_position):
+    next_destination = A_star(graph, ghost.getVertexPosition(), pacman_position)[-2]
+    ghost.setVertexPosition(next_destination.x, next_destination.y)
+
+def is_closer_than_threshold(obj1, obj2, thresh = 360):
+   return (math.sqrt((obj1[0] - obj2[0])**2 + (obj1[1] - obj2[1])**2) < thresh)
