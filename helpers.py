@@ -30,7 +30,7 @@ yellow   = ( 255, 255, 0)
 
 def create_walls():
    frame_walls = [[0,0,6,600], [0,0,600,6], [0,600,606,6],[600,0,6,606]]
-   starts = [0,60,120,180,240,300,360,420,480]
+   starts = [60,120,180,240,300,360,420,480]
    maze = recursive_backtracking(starts, starts)
    return maze+frame_walls
 

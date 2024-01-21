@@ -13,45 +13,44 @@ import time
 from Analytics import *
 
 def startGame(screen, clock, font):
-  # This is a list of 'sprites.' Each block in the program is
+  # This is a list of 'sprites.' Each wall, pacman and food in the program is
   # added to this list. The list is managed by a class called 'RenderPlain.'
   all_sprites_list = pygame.sprite.RenderPlain()
   block_list = pygame.sprite.RenderPlain()
   vertices_list = pygame.sprite.RenderPlain()
   monsta_list = pygame.sprite.RenderPlain()
-
   # Maze is created using recursive_backtracking algorithm
   wall_list = setupMaze(all_sprites_list)
-
-  pacman_initial_x = random.choice([32,572])
-  pacman_initial_y = random.choice([32,572])
   # Create the player paddle object
-  Pacman = Player(pacman_initial_x, pacman_initial_y, "images/pacman.png" )
+  Pacman = Player(random.choice([32,572]), random.choice([32,572]), "images/pacman.png" )
   all_sprites_list.add(Pacman)
-
+  # Create Graph (vertices, edges) using wall list and vertices list
   Graph = initialize_A_star(vertices_list,wall_list)
-  ghost = createGhost(Pacman.getVertexPosition(),Graph)
+  # Ghosts are spawned at a random location with minimum distance of 360 and maximum of 390.
+  # Recall that the overall maze is 600*600 excluding the frames.
+  ghost = createGhost(Pacman.getVertexPosition(), Graph, min_distance = 360, max_distance = 390)
   monsta_list.add(ghost)
-   
+  # Pacman foods are drawn at the places where no wall and PAc-Man exist.
   drawFoods(block_list,all_sprites_list)
-
-  bll = len(block_list)
+  # number of foods will be used to determine the score of the Player
+  num_of_foods = len(block_list)
   score = 0
   game_quitted = False
+  # Ghost update boolean is toggled to update the ghost movement every 20ms, Pacman position is updated every 10ms.
   ghost_update = False
-
+  # The movement of the entities are logged in log files on each game play.
   analytics_logger = initialize_analytics()
+  # Time is kept to spawn another ghost at every GHOST_SPAWN_TIME_SEC seconds.
   init_time = time.time()
+  GHOST_SPAWN_TIME_SEC = 10 # Trials [5,10,30,60]
+  SENSITIVITY_DISTANCE = 400 # Trials [100,300,500]
+  log_custom("GHOST_SPAWN_TIME_SEC is "+str(GHOST_SPAWN_TIME_SEC),analytics_logger)
+  log_custom("SENSITIVITY_DISTANCE is "+str(SENSITIVITY_DISTANCE),analytics_logger)
   while not game_quitted:
-      # apply logging for analytics
-      log_entity_movement("Pacman", Pacman.getVertexPosition(),analytics_logger)
-      for i, ghost in enumerate(monsta_list):
-        log_entity_movement("Ghost_"+str(i), ghost.getVertexPosition(),analytics_logger)
       # ALL EVENT PROCESSING SHOULD GO BELOW THIS COMMENT
       for event in pygame.event.get():
           if event.type == pygame.QUIT:
               game_quitted=True
-
           if event.type == pygame.KEYDOWN:
               if event.key == pygame.K_LEFT:
                   Pacman.changespeed(-30,0)
@@ -61,7 +60,6 @@ def startGame(screen, clock, font):
                   Pacman.changespeed(0,-30)
               if event.key == pygame.K_DOWN:
                   Pacman.changespeed(0,30)
-
           if event.type == pygame.KEYUP:
               if event.key == pygame.K_LEFT:
                   Pacman.changespeed(30,0)
@@ -73,34 +71,40 @@ def startGame(screen, clock, font):
                   Pacman.changespeed(0,-30)
           
       # ALL EVENT PROCESSING SHOULD GO ABOVE THIS COMMENT
-   
-      # ALL GAME LOGIC SHOULD GO BELOW THIS COMMENT
                   
-      if(time.time()-init_time > 10): # if more than 10 seconds is passed
+      # ALL GAME LOGIC SHOULD GO BELOW THIS COMMENT      
+      # apply logging
+      log_entity_movement("Pacman", Pacman.getVertexPosition(),analytics_logger)
+      for i, ghost in enumerate(monsta_list):
+        log_entity_movement("Ghost_"+str(i), ghost.getVertexPosition(),analytics_logger)          
+      # if more than GHOST_SPAWN_TIME_SEC seconds is passed, spawn a new ghost
+      if(time.time()-init_time > GHOST_SPAWN_TIME_SEC): 
          init_time = time.time()
          ghost = createGhost(Pacman.getVertexPosition(),Graph)
          monsta_list.add(ghost)
-         
+      # update Pacman position
       Pacman.update(wall_list)
-
+      # ghost position is updated with two functions. If the ghost is inside of a circle
+      # with radius = SENSITIVITY_DISTANCE, then the ghost path is determined with A_star algorithm. 
+      # If it is not inside this circular area, the ghost movements are random. In the random movement,
+      # ghost can go to up, down, right, left, upper left, upper right, lower left, lower right.
       if(ghost_update):
         ghost_update = False
         for ghost in monsta_list:
-           if(is_closer_than_threshold(ghost.getVertexPosition(),Pacman.getVertexPosition())):
+           if(is_closer_than_threshold(ghost.getVertexPosition(),Pacman.getVertexPosition(),thresh=SENSITIVITY_DISTANCE)):
               ghost_next_destination = A_star(Graph, ghost.getVertexPosition(),Pacman.getVertexPosition())[-2]
               ghost.setVertexPosition(ghost_next_destination.x,ghost_next_destination.y)
            else:
               ghost.randomMovement(wall_list)
       else:
          ghost_update = True
-
       # See if the Pacman block has collided with anything.
       # dokill = True parameter (3rd) removes the collided blocks from the screen.
-      blocks_hit_list = pygame.sprite.spritecollide(Pacman, block_list, True)
+      foods_hit_list = pygame.sprite.spritecollide(Pacman, block_list, True)
       # Check the list of collisions.
-      if len(blocks_hit_list) > 0:
-          score +=len(blocks_hit_list)
-      
+      if len(foods_hit_list) > 0:
+          log_custom("Pacman ate "+str(len(foods_hit_list))+" food",analytics_logger)
+          score +=len(foods_hit_list)
       # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
    
       # ALL CODE TO DRAW SHOULD GO BELOW THIS COMMENT
@@ -108,18 +112,15 @@ def startGame(screen, clock, font):
       wall_list.draw(screen)
       all_sprites_list.draw(screen)
       monsta_list.draw(screen)
-
-      text=font.render("Score: "+str(score)+"/"+str(bll), True, red)
+      text=font.render("Score: "+str(score)+"/"+str(num_of_foods), True, red)
       screen.blit(text, [10, 10])
-
-      if score == bll:
+      if score == num_of_foods:
+        log_custom("Pacman score is: "+str(score)+"/"+str(num_of_foods),analytics_logger)
         doNext("Congratulations, you won!",145,all_sprites_list,block_list,monsta_list,wall_list, screen, clock, font)
-
       monsta_hit_list = pygame.sprite.spritecollide(Pacman, monsta_list, False)
-
       if monsta_hit_list:
+        log_custom("Pacman score is: "+str(score)+"/"+str(num_of_foods),analytics_logger)
         doNext("Game Over",235,all_sprites_list,block_list,monsta_list,wall_list, screen, clock, font)
-
       # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
       pygame.display.flip()
       clock.tick(10)
@@ -175,9 +176,7 @@ def setupMaze(all_sprites_list):
     # return our new list
     return wall_list
 
-def createGhost(pacman_pos, graph):
-  min_distance = 360
-  max_distance = 390
+def createGhost(pacman_pos, graph, min_distance = 360, max_distance = 390):
   color_path = random.choice(["images/Blinky.png", "images/Pinky.png", "images/Inky.png", "images/Clyde.png"])
   v,e = graph
   for vertex in v:

@@ -108,23 +108,16 @@ def plotgraph(vertices, edges):
 
 def A_star(G, start_vertex, end_vertex):
     vertices, edges = G
-
     end_node = Node(end_vertex[0], end_vertex[1])
     start_node = Node(start_vertex[0], start_vertex[1])
-
     # Assert if start and end are members of G.
     assert start_node in vertices, "Start vertex not in graph."
     assert end_node in vertices, "End vertex not in graph."
-
     open_list = []  # open list.
     closed_list = []  # closed list
-
-    
     start_node.f = start_node.h = eucledian_distance(start_node, end_node)
-    
     # For convenience, put graph G to a Node list struct.
     open_list.append(start_node)
-    
     while open_list:
         current_node = min(open_list, key=lambda node: node.f)
         open_list.remove(current_node)
@@ -137,11 +130,9 @@ def A_star(G, start_vertex, end_vertex):
                 path.append(current)
                 current = current.parent
             return path
-
         # Find successors, neighbors
         successor_list = find_neighbors( edges, current_node)
         for successor in successor_list:
-            
             if successor in closed_list:
                 continue
             successor.parent = current_node

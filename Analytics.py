@@ -34,3 +34,7 @@ def initialize_analytics():
 # Function to log entity movements
 def log_entity_movement(entity_name, position, logger):
     logger.info(f"{entity_name} moved to position {position}")
+
+def log_custom(message, logger):
+    logger.info(message)
+
